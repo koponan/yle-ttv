@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
+
 import argparse
 import json
 import requests
 
 
-def get_page(number):
-    url = f"https://yle.fi/aihe/yle-ttv/json?P={number}_0001"
+def get_page(page: int, subpage: int):
+    url = f"https://yle.fi/aihe/yle-ttv/json?P={page}_000{subpage}"
     #print(url)
     res = requests.get(url)
     if not res.ok:
@@ -40,20 +42,30 @@ def drop_html_tags(text_content):
             formatted += c
         
         i += 1
-    
+
+    formatted = formatted.replace("&gt;", ">")
+    formatted = formatted.replace("&amp;", "&")
     return formatted
 
 def init_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--number", type=int, help="Page number", default=100)
+    parser.add_argument("-n", "--page", type=int, help="Page number", default=100)
     parser.add_argument("-r", "--raw", action="store_true", help="Raw HTML output")
-    return parser
+    parser.add_argument("-m", "--subpage", type=int, help="Subpage number", default=1)
+    #return parser
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == "__main__":
-    parser = init_args()
-    args = parser.parse_args()
-    json_str = get_page(args.number)
+    #parser = init_args()
+    #args = parser.parse_args()
+    args = init_args()
+    json_str = get_page(args.page, args.subpage)
+    if not json_str:
+        print("Not found")
+        exit(1)
+
     content = get_content_field(json_str)
     if not args.raw:
         #content = drop_header_and_footer(content)
