@@ -2,11 +2,19 @@
 
 import argparse
 import json
+import math
 import requests
 
+def _digits(x: int):
+    return math.floor(math.log10(x)) + 1
+
+def _zero_pad(x: int):
+    padding = "0" * (4 - _digits(x) )
+    return padding + str(x)
 
 def get_page(page: int, subpage: int):
-    url = f"https://yle.fi/aihe/yle-ttv/json?P={page}_000{subpage}"
+    subpage_padded = _zero_pad(subpage)
+    url = f"https://yle.fi/aihe/yle-ttv/json?P={page}_{subpage_padded}"
     res = requests.get(url)
     if not res.ok:
         return ""
